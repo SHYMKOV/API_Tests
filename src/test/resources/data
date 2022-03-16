@@ -1,0 +1,4 @@
+---
+  baseUrl: "https://eventsexpress-test.azurewebsites.net/api/"
+  categoryUrl: "Category/"
+  eventAll: "https://eventsexpress-test.azurewebsites.net/api/Event/All"
