@@ -1,6 +1,5 @@
 package api;
 
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.json.JSONArray;
@@ -8,21 +7,31 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Base64;
+import java.util.ArrayList;
+import java.util.List;
+
+import static api.Utils.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NewTest {
-    protected String token;
+
+    UserProfile usrProf;
+    String USER_TOKEN;
+
     @BeforeEach
     public void beforeEach(){
 
-    token = new TestAPI().logIn("volodeead.v@gmail.com", "1qaz2wsx3edc");
+        USER_TOKEN = logIn("volodeead.v@gmail.com", "1qaz2wsx3edc");
+        usrProf = new UserProfile(USER_TOKEN);
+
     }
+
     @Test
     public void validateCategory() {
 
-        RequestSpecification request = new TestAPI().requestConf(token);
+        RequestSpecification request = requestConf(USER_TOKEN);
 
         Response response = request.get("https://eventsexpress-test.azurewebsites.net/api/Users/GetCategories");
 
@@ -38,39 +47,44 @@ public class NewTest {
 
         assertTrue(result);
     }
-    public String userId(String token) {
-        String[] arrToken = token.split("\\.");
 
-        Base64.Decoder decoder = Base64.getUrlDecoder();
-        JSONObject payload = new JSONObject(new String(decoder.decode(arrToken[1])));
 
-        return (String) payload.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
+    @Test
+    public void changeGender(){
+
+        String changeGenderUrl = "https://eventsexpress-test.azurewebsites.net/api/Users/EditGender";
+        JSONObject requestBody = new JSONObject();
+
+        List<Integer> index = new ArrayList<Integer>(List.of(0,1,2));
+
+        //TODO
+        index.remove(usrProf.getGender().ordinal());
+
+        int newGenderInt = (int)(Math.random()*2);
+        requestBody.put("gender", newGenderInt );
+
+        RequestSpecification request = requestConf(USER_TOKEN);
+
+        request.body(requestBody.toString());
+        Response response = request.post(changeGenderUrl);
+
+        UserProfile tempUsr = new UserProfile(USER_TOKEN);
+
+        assertEquals( Gender.fromInt(newGenderInt) , tempUsr.getGender() );
+
     }
-    public JSONObject getUserProfile(){
 
-        String userID = userId(token);
-        RequestSpecification request = requestConf(token);
-        Response response = request.get("https://eventsexpress-test.azurewebsites.net/api/Users/GetUserProfileById?id=" + userID);
-        return new JSONObject(response.asString());
-
-    }
     @Test
     public void changeBirthdayDate(){
         String baseUrl = "https://eventsexpress-test.azurewebsites.net/api/Users/EditBirthday";
         JSONObject requestBody = new JSONObject();
         requestBody.put("birthday", "1990-03-17");
-        RequestSpecification request = requestConf(token);
+        RequestSpecification request = requestConf(USER_TOKEN);
         request.body(requestBody.toString());
         Response response = request.post(baseUrl);
-        assertTrue(getUserProfile().get("birthday").equals("1990-03-17T00:00:00"));
+        assertTrue(usrProf.getBirthday().equals("1990-03-17T00:00:00"));
 
     }
 
-    public RequestSpecification requestConf(String token) {
-        RequestSpecification request = RestAssured.given();
-        request.header("Content-Type", "application/json");
-        request.header("Authorization", "Bearer " + token);
-        return request;
-    }
 
 }
