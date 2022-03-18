@@ -7,16 +7,11 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.LinkedList;
 import java.util.List;
 
 import static api.Utils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -79,43 +74,17 @@ public class NewTest {
 
     }
 
-
-
-
-
-    public String userId(String token) {
-        String[] arrToken = token.split("\\.");
-
-        Base64.Decoder decoder = Base64.getUrlDecoder();
-        JSONObject payload = new JSONObject(new String(decoder.decode(arrToken[1])));
-
-        return (String) payload.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
-    }
-    public JSONObject getUserProfile(){
-
-        String userID = userId(token);
-        RequestSpecification request = requestConf(token);
-        Response response = request.get("https://eventsexpress-test.azurewebsites.net/api/Users/GetUserProfileById?id=" + userID);
-        return new JSONObject(response.asString());
-
-    }
     @Test
     public void changeBirthdayDate(){
         String baseUrl = "https://eventsexpress-test.azurewebsites.net/api/Users/EditBirthday";
         JSONObject requestBody = new JSONObject();
         requestBody.put("birthday", "1990-03-17");
-        RequestSpecification request = requestConf(token);
+        RequestSpecification request = requestConf(USER_TOKEN);
         request.body(requestBody.toString());
         Response response = request.post(baseUrl);
-        assertTrue(getUserProfile().get("birthday").equals("1990-03-17T00:00:00"));
+        assertTrue(usrProf.getBirthday().equals("1990-03-17T00:00:00"));
 
     }
 
-    public RequestSpecification requestConf(String token) {
-        RequestSpecification request = RestAssured.given();
-        request.header("Content-Type", "application/json");
-        request.header("Authorization", "Bearer " + token);
-        return request;
-    }
 
 }
