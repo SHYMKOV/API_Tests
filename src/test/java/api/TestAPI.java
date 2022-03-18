@@ -52,62 +52,6 @@ public class TestAPI {
                 .body("size()", is(24));
     }
 
-    public String logIn(String email, String password) {
-        String baseUrl = "https://eventsexpress-test.azurewebsites.net/api/";
-        JSONObject requestBody = new JSONObject();
-        requestBody.put("email", email);
-        requestBody.put("password", password);
-        //requestBody.put("email", "volodeead.v@gmail.com");
-        //requestBody.put("password", "1qaz2wsx3edc");
-
-        RequestSpecification request = RestAssured.given();
-        request.header("Content-Type", "application/json");
-        request.body(requestBody.toString());
-        Response response = request.post(baseUrl + "Authentication/Login");
-
-        JSONObject token = new JSONObject(response.asString());
-
-        return (String)token.get("token");
-    }
-
-    public String userId(String token) {
-        String[] arrToken = token.split("\\.");
-
-        Base64.Decoder decoder = Base64.getUrlDecoder();
-        JSONObject payload = new JSONObject(new String(decoder.decode(arrToken[1])));
-
-        return (String) payload.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid");
-    }
-
-    public RequestSpecification requestConf(String token) {
-        RequestSpecification request = RestAssured.given();
-        request.header("Content-Type", "application/json");
-        request.header("Authorization", "Bearer " + token);
-        return request;
-    }
-
-    @Test
-    public void validateCategory() {
-
-        String token = logIn("volodeead.v@gmail.com", "1qaz2wsx3edc");
-
-        RequestSpecification request = requestConf(token);
-
-        Response response = request.get("https://eventsexpress-test.azurewebsites.net/api/Users/GetCategories");
-
-        JSONArray resp = new JSONArray(response.asString());
-
-        boolean result = false;
-
-        for(Object element : resp){
-           if(((JSONObject)element).get("name").equals("Danc")){
-               result = true; break;
-           }
-        }
-
-        assertTrue(result);
-    }
-
     @Test
     public void verifyStartDate() {
         RestAssured.baseURI = eventAll;
