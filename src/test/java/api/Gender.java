@@ -12,4 +12,17 @@ public enum Gender {
         this.gen = i;
     }
 
+    public int getGen() {
+        return gen;
+    }
+
+    public static Gender fromInt (int i){
+        for(Gender gender : Gender.values()){
+            if(gender.getGen() == i){
+                return gender;
+            }
+        }
+       throw new IllegalArgumentException("value " + i + " cant convert to Gender");
+    }
+
 }
