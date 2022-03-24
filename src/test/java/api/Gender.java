@@ -25,4 +25,8 @@ public enum Gender {
        throw new IllegalArgumentException("value " + i + " cant convert to Gender");
     }
 
+    public int getOrdinalGender (){
+       return this.ordinal();
+    }
+
 }
